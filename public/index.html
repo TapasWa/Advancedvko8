@@ -111,24 +111,33 @@
       const topicFormDiv = document.getElementById('topicForm');
       topicFormDiv.innerHTML = '';
       
+      const inputDiv = document.createElement('div');
+      inputDiv.className = 'input-field';
+      
       const input = document.createElement('input');
       input.id = 'topicTitle';
       input.type = 'text';
       input.placeholder = 'Topic Title';
-      input.style.marginTop = '20px';
+      
+      inputDiv.appendChild(input);
+      
+      const textareaDiv = document.createElement('div');
+      textareaDiv.className = 'input-field';
       
       const textarea = document.createElement('textarea');
       textarea.id = 'topicText';
       textarea.className = 'materialize-textarea';
       textarea.placeholder = 'Topic Content';
       
+      textareaDiv.appendChild(textarea);
+      
       const button = document.createElement('button');
       button.id = 'postTopic';
       button.className = 'btn waves-effect waves-light';
       button.textContent = 'Post Topic';
       
-      topicFormDiv.appendChild(input);
-      topicFormDiv.appendChild(textarea);
+      topicFormDiv.appendChild(inputDiv);
+      topicFormDiv.appendChild(textareaDiv);
       topicFormDiv.appendChild(button);
       
       // Add event listener to post button

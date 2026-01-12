@@ -3,12 +3,10 @@ import { body, ValidationChain } from 'express-validator';
 export const registerValidation: ValidationChain[] = [
   body('email')
     .trim()
-    .escape()
     .isEmail()
     .withMessage('Please provide a valid email'),
   body('username')
     .trim()
-    .escape()
     .isLength({ min: 3, max: 25 })
     .withMessage('Username must be between 3 and 25 characters'),
   body('password')
@@ -27,7 +25,6 @@ export const registerValidation: ValidationChain[] = [
 export const loginValidation: ValidationChain[] = [
   body('email')
     .trim()
-    .escape()
     .isEmail()
     .withMessage('Please provide a valid email'),
   body('password')

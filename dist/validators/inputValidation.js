@@ -5,12 +5,10 @@ const express_validator_1 = require("express-validator");
 exports.registerValidation = [
     (0, express_validator_1.body)('email')
         .trim()
-        .escape()
         .isEmail()
         .withMessage('Please provide a valid email'),
     (0, express_validator_1.body)('username')
         .trim()
-        .escape()
         .isLength({ min: 3, max: 25 })
         .withMessage('Username must be between 3 and 25 characters'),
     (0, express_validator_1.body)('password')
@@ -28,7 +26,6 @@ exports.registerValidation = [
 exports.loginValidation = [
     (0, express_validator_1.body)('email')
         .trim()
-        .escape()
         .isEmail()
         .withMessage('Please provide a valid email'),
     (0, express_validator_1.body)('password')
