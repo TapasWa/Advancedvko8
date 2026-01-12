@@ -79,6 +79,7 @@ router.post('/login', loginValidation, async (req: Request, res: Response) => {
 
     res.json({ token });
   } catch (error) {
+    console.error('Login error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });
