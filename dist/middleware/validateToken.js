@@ -11,7 +11,7 @@ const validateToken = (req, res, next) => {
         return res.status(401).json({ message: 'Token not found.' });
     }
     try {
-        const decoded = jsonwebtoken_1.default.verify(token, process.env.SECRET || '');
+        const decoded = jsonwebtoken_1.default.verify(token, process.env.SECRET || 'default_secret_key');
         req.user = decoded;
         next();
     }
@@ -26,7 +26,7 @@ const validateAdmin = (req, res, next) => {
         return res.status(401).json({ message: 'Token not found.' });
     }
     try {
-        const decoded = jsonwebtoken_1.default.verify(token, process.env.SECRET || '');
+        const decoded = jsonwebtoken_1.default.verify(token, process.env.SECRET || 'default_secret_key');
         if (!decoded.isAdmin) {
             return res.status(403).json({ message: 'Access denied.' });
         }

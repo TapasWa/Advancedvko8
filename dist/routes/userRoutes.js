@@ -65,7 +65,7 @@ router.post('/login', inputValidation_1.loginValidation, async (req, res) => {
             _id: user._id,
             username: user.username,
             isAdmin: user.isAdmin
-        }, process.env.SECRET || '', { expiresIn: '1h' });
+        }, process.env.SECRET || 'default_secret_key', { expiresIn: '1h' });
         res.json({ token });
     }
     catch (error) {

@@ -17,7 +17,7 @@ export const validateToken = (req: AuthRequest, res: Response, next: NextFunctio
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.SECRET || '') as {
+    const decoded = jwt.verify(token, process.env.SECRET || 'default_secret_key') as {
       _id: string;
       username: string;
       isAdmin: boolean;
@@ -37,7 +37,7 @@ export const validateAdmin = (req: AuthRequest, res: Response, next: NextFunctio
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.SECRET || '') as {
+    const decoded = jwt.verify(token, process.env.SECRET || 'default_secret_key') as {
       _id: string;
       username: string;
       isAdmin: boolean;

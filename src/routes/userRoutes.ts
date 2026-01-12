@@ -73,7 +73,7 @@ router.post('/login', loginValidation, async (req: Request, res: Response) => {
         username: user.username,
         isAdmin: user.isAdmin
       },
-      process.env.SECRET || '',
+      process.env.SECRET || 'default_secret_key',
       { expiresIn: '1h' }
     );
 
