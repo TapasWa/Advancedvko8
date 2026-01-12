@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Forum</title>
+  <!-- Compiled and minified CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+  <!-- Navbar -->
+  <nav>
+    <div class="nav-wrapper">
+      <a href="#" class="brand-logo" style="padding-left: 20px;">Forum</a>
+      <ul class="right">
+        <li>
+          <form id="loginForm" class="row">
+            <div class="input-field col">
+              <input id="email" type="email" class="navbar-input" required>
+              <label for="email">Email</label>
+            </div>
+            <div class="input-field col">
+              <input id="password" type="password" class="navbar-input" required>
+              <label for="password">Password</label>
+            </div>
+            <div class="col">
+              <button class="btn waves-effect waves-light" type="submit">Login</button>
+            </div>
+            <div class="col">
+              <a href="register.html" class="btn waves-effect waves-light">Register</a>
+            </div>
+          </form>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Main content -->
+  <div class="container">
+    <!-- Topic form will be dynamically created here -->
+    <div id="topicForm"></div>
+    
+    <!-- Topics will be displayed here -->
+    <div id="topics"></div>
+  </div>
+
+  <!-- Compiled and minified JavaScript -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+  <script>
+    let token = localStorage.getItem('token');
+    let isAdmin = false;
+
+    // Initialize the page
+    document.addEventListener('DOMContentLoaded', () => {
+      if (token) {
+        // Decode JWT to check if admin
+        try {
+          const payload = JSON.parse(atob(token.split('.')[1]));
+          isAdmin = payload.isAdmin;
+          createTopicForm();
+        } catch (error) {
+          console.error('Invalid token');
+        }
+      }
+      loadTopics();
+    });
+
+    // Login form handler
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      try {
+        const response = await fetch('/api/user/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ email, password })
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          token = data.token;
+          localStorage.setItem('token', token);
+          
+          // Decode token to check if admin
+          const payload = JSON.parse(atob(token.split('.')[1]));
+          isAdmin = payload.isAdmin;
+          
+          alert('Login successful!');
+          createTopicForm();
+          loadTopics();
+          
+          // Clear form
+          document.getElementById('loginForm').reset();
+        } else {
+          const data = await response.json();
+          alert(data.message || 'Login failed');
+        }
+      } catch (error) {
+        alert('Error: ' + error.message);
+      }
+    });
+
+    // Create topic form dynamically
+    function createTopicForm() {
+      const topicFormDiv = document.getElementById('topicForm');
+      topicFormDiv.innerHTML = '';
+      
+      const input = document.createElement('input');
+      input.id = 'topicTitle';
+      input.type = 'text';
+      input.placeholder = 'Topic Title';
+      input.style.marginTop = '20px';
+      
+      const textarea = document.createElement('textarea');
+      textarea.id = 'topicText';
+      textarea.className = 'materialize-textarea';
+      textarea.placeholder = 'Topic Content';
+      
+      const button = document.createElement('button');
+      button.id = 'postTopic';
+      button.className = 'btn waves-effect waves-light';
+      button.textContent = 'Post Topic';
+      
+      topicFormDiv.appendChild(input);
+      topicFormDiv.appendChild(textarea);
+      topicFormDiv.appendChild(button);
+      
+      // Add event listener to post button
+      button.addEventListener('click', postTopic);
+    }
+
+    // Post a new topic
+    async function postTopic() {
+      const title = document.getElementById('topicTitle').value;
+      const content = document.getElementById('topicText').value;
+
+      if (!title || !content) {
+        alert('Please fill in all fields');
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/topic', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ title, content })
+        });
+
+        if (response.ok) {
+          alert('Topic posted successfully!');
+          document.getElementById('topicTitle').value = '';
+          document.getElementById('topicText').value = '';
+          loadTopics();
+        } else {
+          const data = await response.json();
+          alert(data.message || 'Failed to post topic');
+        }
+      } catch (error) {
+        alert('Error: ' + error.message);
+      }
+    }
+
+    // Load all topics
+    async function loadTopics() {
+      try {
+        const response = await fetch('/api/topics');
+        const topics = await response.json();
+        
+        const topicsDiv = document.getElementById('topics');
+        topicsDiv.innerHTML = '';
+        
+        topics.forEach(topic => {
+          const topicDiv = document.createElement('div');
+          topicDiv.className = 'card z-depth-2 hoverable grey lighten-2';
+          
+          const cardContent = document.createElement('div');
+          cardContent.className = 'card-content';
+          
+          const title = document.createElement('span');
+          title.className = 'card-title';
+          title.textContent = topic.title;
+          
+          const content = document.createElement('p');
+          content.textContent = topic.content;
+          
+          const meta = document.createElement('p');
+          meta.className = 'grey-text text-darken-2';
+          const date = new Date(topic.createdAt).toLocaleString();
+          meta.textContent = `Posted by ${topic.username} on ${date}`;
+          
+          cardContent.appendChild(title);
+          cardContent.appendChild(content);
+          cardContent.appendChild(meta);
+          
+          topicDiv.appendChild(cardContent);
+          
+          // Add delete button if admin
+          if (isAdmin) {
+            const cardAction = document.createElement('div');
+            cardAction.className = 'card-action';
+            
+            const deleteBtn = document.createElement('button');
+            deleteBtn.id = 'deleteTopic';
+            deleteBtn.className = 'btn waves-effect waves-light';
+            deleteBtn.textContent = 'Delete';
+            deleteBtn.onclick = () => deleteTopic(topic._id);
+            
+            cardAction.appendChild(deleteBtn);
+            topicDiv.appendChild(cardAction);
+          }
+          
+          topicsDiv.appendChild(topicDiv);
+        });
+      } catch (error) {
+        alert('Error loading topics: ' + error.message);
+      }
+    }
+
+    // Delete a topic
+    async function deleteTopic(id) {
+      try {
+        const response = await fetch(`/api/topic/${id}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          alert(data.message);
+          loadTopics();
+        } else {
+          const data = await response.json();
+          alert(data.message || 'Failed to delete topic');
+        }
+      } catch (error) {
+        alert('Error: ' + error.message);
+      }
+    }
+  </script>
+</body>
+</html>
